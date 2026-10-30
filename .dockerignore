@@ -1,0 +1,15 @@
+**/.venv
+**/node_modules
+**/.next
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/*.db
+**/qdrant_data
+**/tsconfig.tsbuildinfo
+**/*.png
+.env
+.env.*
+!.env.example
+.git
+docs

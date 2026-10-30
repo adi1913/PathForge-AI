@@ -1,0 +1,14 @@
+# Shared by all three MCP servers (github/, search/, learning-resources/)
+# and common/. Install once, in a dedicated venv separate from apps/api's
+# — these are standalone processes (see docs/architecture.md "MCP client
+# contract": FastAPI talks to these over MCP, never by importing this code).
+#
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+mcp==2.2.0
+httpx==0.28.1
+pydantic==2.13.5
+pytest==9.1.1
+pytest-asyncio==1.4.0
+ruff==0.16.6

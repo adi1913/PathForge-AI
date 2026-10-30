@@ -1,0 +1,32 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "BLE", "RUF"]
+ignore = [
+    # SQLAlchemy 2.0 `Mapped["ClassName"]` relationship type hints are
+    # legitimate forward references resolved lazily by the ORM's mapper
+    # registry at configure-time, not module-level names — ruff has no
+    # visibility into that resolution and false-positives on every one.
+    "F821",
+    # `Depends(...)` as a FastAPI parameter default is the documented,
+    # required pattern for dependency injection, not the mutable-default
+    # footgun this rule exists to catch.
+    "B008",
+    # En dash / em dash appear deliberately in regex character classes
+    # matching real date-range separators in resume text ("2020–2022"),
+    # not as stray non-ASCII identifier characters.
+    "RUF001",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Import order here is deliberate: env.py must configure sys.path and
+# import app settings before other imports can resolve.
+"alembic/env.py" = ["E402"]
+
+[tool.pytest.ini_options]
+# auto: async def test_* functions run as coroutines with no per-test
+# @pytest.mark.asyncio needed; sync tests (the Phase 1-3 majority) are
+# untouched by this setting.
+asyncio_mode = "auto"

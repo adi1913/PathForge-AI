@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "BLE", "RUF"]
+ignore = [
+    # Each server file does an explicit sys.path.insert() before importing
+    # sibling/parent-directory modules (see module docstrings for why —
+    # hyphenated `learning-resources/` can't be a dotted package). That
+    # import necessarily comes after the sys.path manipulation.
+    "E402",
+]

@@ -1,0 +1,34 @@
+# Python virtual environments
+.venv/
+.venv312/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python cache and testing
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node.js
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Qdrant local database and runtime files
+apps/api/qdrant_data/
+qdrant_data/
+
+# Python virtual environments
+.venv/
+.venv312/

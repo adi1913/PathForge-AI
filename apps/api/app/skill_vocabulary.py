@@ -1,0 +1,66 @@
+"""Shared technology vocabulary used by the rule-based (DEMO_MODE)
+extractors for resumes (Phase 6) and job descriptions (Phase 7), so both
+recognize the same terms. Plain substring matching against a known list —
+never invents a term that isn't present in the text."""
+
+TECH_VOCABULARY = [
+    "python",
+    "javascript",
+    "typescript",
+    "java",
+    "c++",
+    "c#",
+    "go",
+    "rust",
+    "sql",
+    "nosql",
+    "fastapi",
+    "django",
+    "flask",
+    "react",
+    "next.js",
+    "vue",
+    "angular",
+    "node.js",
+    "docker",
+    "kubernetes",
+    "aws",
+    "gcp",
+    "azure",
+    "terraform",
+    "ci/cd",
+    "machine learning",
+    "deep learning",
+    "rag",
+    "nlp",
+    "pytorch",
+    "tensorflow",
+    "scikit-learn",
+    "git",
+    "rest api",
+    "graphql",
+    "postgresql",
+    "mysql",
+    "mongodb",
+    "redis",
+    "mcp",
+    "ai agents",
+    "llm",
+    "langchain",
+    "langgraph",
+    "qdrant",
+    "pinecone",
+    "html",
+    "css",
+    "linux",
+    "bash",
+    "spark",
+    "hadoop",
+    "airflow",
+    "kafka",
+]
+
+
+def find_tech_mentions(text: str) -> list[str]:
+    lowered = text.lower()
+    return [term for term in TECH_VOCABULARY if term in lowered]

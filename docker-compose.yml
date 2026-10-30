@@ -1,0 +1,84 @@
+# Production-like stack: Postgres + Qdrant + API (migrations run on start) + web. No bind mounts, no --reload.
+# Required (compose refuses to start without them): SECRET_KEY (>= 32 chars) and POSTGRES_PASSWORD.
+# Put them in a git-ignored .env next to this file (see .env.example) or export them. Developer hot-reload:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+name: pathforge
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pathforge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: pathforge
+    # Not published to the host: only the api service needs it.
+    volumes:
+      - pathforge_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pathforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    restart: unless-stopped
+    # Not published to the host: only the api service needs it.
+    volumes:
+      - pathforge_qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: "false"
+      AUTH_REQUIRED: "true"
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY (>= 32 random chars) in .env}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-[]}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      SEARCH_PROVIDER_API_KEY: ${SEARCH_PROVIDER_API_KEY:-}
+      SEARCH_PROVIDER_BASE_URL: ${SEARCH_PROVIDER_BASE_URL:-}
+      LEARNING_PROVIDER_API_KEY: ${LEARNING_PROVIDER_API_KEY:-}
+      LEARNING_PROVIDER_BASE_URL: ${LEARNING_PROVIDER_BASE_URL:-}
+      DATABASE_URL: postgresql+psycopg2://pathforge:${POSTGRES_PASSWORD}@db:5432/pathforge
+      QDRANT_URL: http://qdrant:6333
+    depends_on:
+      db:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Compiled into the browser bundle: the URL the BROWSER uses to reach the API.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  pathforge_pgdata:
+  pathforge_qdrant_data:
